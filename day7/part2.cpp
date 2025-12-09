@@ -25,24 +25,26 @@ ll runOnce() {
     infile.close();
     int r{ (int)tachyons.size() };
     int c{ (int)tachyons[0].size() };
-    std::vector<std::vector<ll>> visited(r, std::vector<ll>(c, 0));
-    for (int i = 0; i < c; i++) visited[r - 1][i] = 1;
+    std::vector<ll> next_row(c, 1);
     int origin{};
     while (tachyons[0][origin] != 'S') ++origin;
 
     for (int i = r - 2; i >= 1; i--) {
+        std::vector<ll> curr_row(c, 0);
         for (int j = 0; j < c; j++) {
             if (tachyons[i][j] != '^') {
-                visited[i][j] = visited[i + 1][j];
+                curr_row[j] = next_row[j];
                 continue;
             }
-            ll leftbeam = (j - 1 >= 0) ? visited[i + 1][j - 1] : 0;
-            ll rightbeam = (j + 1 < c) ? visited[i + 1][j + 1] : 0;
-            visited[i][j] = leftbeam + rightbeam;
+            ll leftbeam = (j - 1 >= 0) ? next_row[j - 1] : 0;
+            ll rightbeam = (j + 1 < c) ? next_row[j + 1] : 0;
+            curr_row[j] = leftbeam + rightbeam;
         }
+        next_row = curr_row;
+        curr_row.clear();
     }
 
-    return visited[1][origin];
+    return next_row[origin];
 }
 
 
