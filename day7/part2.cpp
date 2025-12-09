@@ -10,18 +10,6 @@
 
 typedef long long ll;
 
-ll dfs(int r, int c, const std::vector<std::string> &tach, const int &rows, const int &cols, std::vector<std::vector<ll>> &visited) {
-    for (int i = r; i < rows; i++) {
-        if (tach[i][c] == '^') {
-            if (visited[i][c] != -1) return visited[i][c];
-            ll left_beam = ((c - 1) >= 0) ? dfs(i+1, c - 1, tach, rows, cols, visited) : 0;
-            ll right_beam = ((c + 1) < cols) ? dfs(i+1, c + 1, tach, rows, cols, visited) : 0;
-            return visited[i][c] = (left_beam + right_beam);
-        }
-    }
-    return 1;
-}
-
 ll runOnce() {
     std::ifstream infile("day7.txt");
     if (!infile.is_open()) {
@@ -37,10 +25,24 @@ ll runOnce() {
     infile.close();
     int r{ (int)tachyons.size() };
     int c{ (int)tachyons[0].size() };
-    std::vector<std::vector<ll>> visited(r, std::vector<ll>(c, -1));
+    std::vector<std::vector<ll>> visited(r, std::vector<ll>(c, 0));
+    for (int i = 0; i < c; i++) visited[r - 1][i] = 1;
     int origin{};
     while (tachyons[0][origin] != 'S') ++origin;
-    return dfs(1, origin, tachyons, r, c, visited);
+
+    for (int i = r - 2; i >= 1; i--) {
+        for (int j = 0; j < c; j++) {
+            if (tachyons[i][j] != '^') {
+                visited[i][j] = visited[i + 1][j];
+                continue;
+            }
+            ll leftbeam = (j - 1 >= 0) ? visited[i + 1][j - 1] : 0;
+            ll rightbeam = (j + 1 < c) ? visited[i + 1][j + 1] : 0;
+            visited[i][j] = leftbeam + rightbeam;
+        }
+    }
+
+    return visited[1][origin];
 }
 
 
