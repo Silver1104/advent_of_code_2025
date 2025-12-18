@@ -10,23 +10,23 @@
 #include <unordered_set>
 #include <queue>
 
-int allPaths(int curr, const int& end, const std::unordered_map<int, std::vector<int>>& adj_map, std::unordered_set<int>& vis) {
-    if (curr == end) return 1;
-    if (vis.find(curr) != vis.end()) return 0;
-    vis.insert(curr);
-    if (adj_map.find(curr) == adj_map.end()) return 0;
-
-    int total{};
+int allPaths(int curr, const int& end, const std::unordered_map<int, std::vector<int>>& adj_map, std::unordered_map<int, int>& mem) {
+    int tot{};
+    if (adj_map.find(curr) == adj_map.end()) return tot;
     for (auto& output : adj_map.at(curr)) {
-        total += allPaths(output, end, adj_map, vis);
+        if (mem.find(output) != mem.end())
+            tot += mem[output];
+        else if (output == end)
+            tot++;
+        else if(output != end)
+            tot += allPaths(output, end, adj_map, mem);
     }
-    vis.erase(curr);
-    return total;
+    return mem[curr] = tot;
 }
 
 double getDataAndRun() {
     using namespace std::chrono;
-    std::ifstream infile("day11.txt");
+    std::ifstream infile("day11_test.txt");
     if (!infile.is_open()) {
         std::cerr << "Failed to open file." << std::endl;
         return -1;
@@ -68,8 +68,8 @@ double getDataAndRun() {
 
     for (int i = 1; i <= RUNS; i++) {
         auto start = high_resolution_clock::now();
-        std::unordered_set<int> visited;
-        int result = allPaths(start_search, end_search, adj_map, visited);
+        std::unordered_map<int, int> mem;
+        int result = allPaths(start_search, end_search, adj_map, mem);
         auto end = high_resolution_clock::now();
         double ms = duration_cast<milliseconds>(end - start).count();
         std::cout << "Run " << i << " time: " << ms << " ms, result=" << result << std::endl;
